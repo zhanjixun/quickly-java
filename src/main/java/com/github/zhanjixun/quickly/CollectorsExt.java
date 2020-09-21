@@ -10,6 +10,7 @@ import java.util.stream.Collector;
  *
  * @author zhanjixun
  * @date 2020-09-21 16:25:01
+ * @see java.util.stream.Collectors
  */
 public class CollectorsExt {
 
@@ -30,5 +31,5 @@ public class CollectorsExt {
             return a;
         }, a -> a[0].divide(a[1], MathContext.DECIMAL32));
     }
-
+    
 }
