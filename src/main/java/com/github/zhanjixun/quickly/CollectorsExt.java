@@ -2,6 +2,7 @@ package com.github.zhanjixun.quickly;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
@@ -31,5 +32,43 @@ public class CollectorsExt {
             return a;
         }, a -> a[0].divide(a[1], MathContext.DECIMAL32));
     }
-    
+
+    /**
+     * 分组收集
+     *
+     * @param groupBy 分组标记
+     * @param mapper  组内转换
+     * @param <T>
+     * @param <K>
+     * @param <R>
+     * @return
+     */
+    public static <T, K, R> Collector<T, ?, List<R>> groupCollect(Function<? super T, ? extends K> groupBy, Function<List<T>, R> mapper) {
+        return Collector.of(() -> new HashMap<K, List<T>>(), (map, t) -> {
+            K key = groupBy.apply(t);
+            if (map.containsKey(key)) {
+                map.get(key).add(t);
+            } else {
+                map.put(key, new ArrayList<>(Collections.singleton(t)));
+            }
+        }, (map1, map2) -> {
+            HashMap<K, List<T>> resultMap = new HashMap<>(map1);
+            for (Map.Entry<K, List<T>> entry : map2.entrySet()) {
+                if (resultMap.containsKey(entry.getKey())) {
+                    map2.get(entry.getKey()).addAll(entry.getValue());
+                } else {
+                    resultMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                }
+            }
+            return resultMap;
+        }, map -> {
+            List<R> result = new ArrayList<>();
+            Collection<List<T>> values = map.values();
+            for (List<T> value : values) {
+                result.add(mapper.apply(value));
+            }
+            return result;
+        });
+    }
+
 }
