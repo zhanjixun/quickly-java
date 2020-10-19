@@ -34,7 +34,7 @@ public class CollectorsExt {
     }
 
     /**
-     * 分组收集
+     * 分组收集,只取值,不要分组键
      *
      * @param groupBy 分组标记
      * @param mapper  组内转换
