@@ -45,20 +45,11 @@ public class CollectorsExt {
      */
     public static <T, K, R> Collector<T, ?, List<R>> groupCollect(Function<? super T, ? extends K> groupBy, Function<List<T>, R> mapper) {
         return Collector.of(() -> new HashMap<K, List<T>>(), (map, t) -> {
-            K key = groupBy.apply(t);
-            if (map.containsKey(key)) {
-                map.get(key).add(t);
-            } else {
-                map.put(key, new ArrayList<>(Collections.singleton(t)));
-            }
+            map.computeIfAbsent(groupBy.apply(t), d -> new ArrayList<>()).add(t);
         }, (map1, map2) -> {
             HashMap<K, List<T>> resultMap = new HashMap<>(map1);
             for (Map.Entry<K, List<T>> entry : map2.entrySet()) {
-                if (resultMap.containsKey(entry.getKey())) {
-                    map2.get(entry.getKey()).addAll(entry.getValue());
-                } else {
-                    resultMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
-                }
+                resultMap.computeIfAbsent(entry.getKey(), d -> new ArrayList<>()).addAll(entry.getValue());
             }
             return resultMap;
         }, map -> {
